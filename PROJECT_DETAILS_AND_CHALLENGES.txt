@@ -1,0 +1,117 @@
+================================================================================
+MORA BLOG - DYNAMIC MODERNIZATION & CMS PLATFORM
+Comprehensive Project Documentation & Technical Overview
+================================================================================
+
+1. EXECUTIVE SUMMARY & PROJECT OBJECTIVE
+--------------------------------------------------------------------------------
+Project Title: Mora Blog - Dynamic Modernization & Administrative CMS Platform
+Core Technologies: PHP 8.x, MySQL / Relational SQL, HTML5, CSS3, JavaScript (ES6+),
+                   Python 3 (Local Development CLI & DB Inspection)
+
+Objective:
+Transform a static, multi-template HTML magazine website into a secure, dynamic,
+database-driven publishing application featuring dual-role authentication (Admin vs.
+Standard Reader), automated content aggregation, and a dedicated Content Management
+System (CMS) Admin Panel.
+
+
+2. SYSTEM ARCHITECTURE & DATABASE DESIGN
+--------------------------------------------------------------------------------
+The relational schema (database.sql) includes 5 normalized tables:
+
+- USERS:
+  Stores user credentials, roles ('admin' or 'user'), bcrypt password hashes,
+  avatars, bios, and timestamps.
+- CATEGORIES:
+  Stores taxonomy structures (Business, Technology, Travel, Fashion, Finance)
+  with URL slugs and descriptions.
+- POSTS:
+  Articles with category IDs, author IDs, featured/breaking flags, view counts,
+  like counters, publication status, and markdown/HTML body content.
+- COMMENTS:
+  Community feedback system linked to posts and user IDs with moderation flags
+  ('approved' vs 'pending').
+- SUBSCRIBERS:
+  Newsletter audience storage with UNIQUE email indexing and registration timestamps.
+
+
+3. KEY FUNCTIONAL MODULES
+--------------------------------------------------------------------------------
+A. Public Frontend:
+- Single Unified Homepage (index.php): Consolidates previously scattered templates
+  into a single cohesive editorial feed with breaking news ticker and hero grid.
+- Dynamic News Directory (news.php): Live article listing with search, category filters,
+  reading time calculations, like counters, and post counts.
+- Article Detail View (post-detail.php): Real-time view count tracking, like toggling,
+  social sharing, and public reader comments.
+- Newsletter System: Captures email subscribers directly from footer/sidebar with
+  instant database persistence and duplicate submission prevention.
+
+B. Dual-Role Authentication & Security:
+- Admin vs User role-based access control.
+- Bcrypt password hashing (PASSWORD_BCRYPT).
+- PDO prepared statements with strict parameter binding against SQL injection.
+- htmlspecialchars sanitization against Cross-Site Scripting (XSS).
+- requireAdmin() route middleware protecting administrative endpoints.
+
+C. Administrative CMS Panel (/admin):
+- Dashboard (admin/index.php): Real-time stats (posts, categories, comments, users, subscribers).
+- Posts CRUD (admin/posts.php, admin/post-add.php, admin/post-edit.php).
+- Categories Management (admin/categories.php).
+- Comments Moderation (admin/comments.php).
+- User & Role Administration (admin/users.php).
+- Newsletter Subscribers Portal (admin/subscribers.php).
+
+
+4. PROBLEMS FACED & HOW THEY WERE RESOLVED
+--------------------------------------------------------------------------------
+Challenge 1: Zero External Runtime Downloads on macOS
+- Problem: Modern macOS does not ship with PHP pre-installed. Installing Homebrew,
+  XAMPP, or MAMP requires 1GB-2GB downloads, which conflicted with the CLI requirement.
+- Solution: Created server.py using Python's pre-installed standard library (http.server
+  and sqlite3) to serve static assets and emulate PHP/SQL backend API routes locally.
+
+Challenge 2: Dual Database Compatibility (MySQL Production vs. SQLite Local Preview)
+- Problem: Client servers use MySQL/MariaDB, while zero-download local CLI development
+  needed an embedded database without running a MySQL service daemon.
+- Solution: Engineered a dual-engine database architecture (config/db.php). It connects
+  to MySQL via PDO on live servers and automatically falls back to SQLite
+  (config/mora_blog.sqlite) for local previews. Both engines share identical schemas.
+
+Challenge 3: Eliminating Duplicate Template Versions
+- Problem: The original template archive had conflicting layouts (Home v1, Home v2,
+  static demo menus, hardcoded post counts).
+- Solution: Audited templates, unified them into a single dynamic homepage (index.php),
+  and replaced hardcoded counts with live SQL aggregate queries (COUNT(*)).
+
+Challenge 4: macOS TCP Port Conflicts ([Errno 48] Address already in use)
+- Problem: Restarting the local development runner failed when the port was held in
+  TIME_WAIT state by the kernel.
+- Solution: Configured socket reuse in server.py:
+  socketserver.TCPServer.allow_reuse_address = True
+
+Challenge 5: Terminal Working Directory Misalignment
+- Problem: Running python3 show_db.py from the user home folder failed with
+  "No such file or directory".
+- Solution: Documented proper project root navigation (cd Documents/antigravity/serene-franklin)
+  and enabled absolute path execution.
+
+Challenge 6: Client Handover & UI Sanitization
+- Problem: Development versions contained intern names, debug badges, and static date banners.
+- Solution: Sanitized all templates and headers to adhere to clean, production-grade
+  editorial standards.
+
+
+5. DEFAULT ACCESS CREDENTIALS
+--------------------------------------------------------------------------------
+Administrator:
+  URL:      http://localhost:8000/admin/
+  Username: admin
+  Password: password123 (or admin123)
+
+Standard User:
+  URL:      http://localhost:8000/login.php
+  Username: john_doe
+  Password: password123
+================================================================================
